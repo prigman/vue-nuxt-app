@@ -5,13 +5,14 @@
         <h2 class="text-3xl font-regular">1Tool todo list</h2>
         <button
           v-if="!user.name"
+					data-type="login"
           v-on:click="setModal()"
           class="bg-sky-300 text-white rounded cursor-pointer p-2"
         >
           Login
         </button>
         <div v-else class="flex items-center">
-          <span class="text-green-500 mr-4">Welcome {{ user.name }}!</span>
+          <span data-type="welcome-username" class="text-green-500 mr-4">Welcome {{ user.name }}!</span>
           <button
             v-on:click="logout()"
             class="bg-red-500 text-white rounded cursor-pointer p-2"
@@ -23,6 +24,7 @@
 
       <div
         v-if="modal"
+				data-type="modal"
         class="relative z-10"
         aria-labelledby="modal-title"
         role="dialog"
@@ -93,6 +95,7 @@
                       value="Login"
                     />
                   </form>
+									<span v-if="loginError" class="text-red-500" data-type="login-error">Login error</span>
                 </div>
               </div>
             </div>
@@ -195,6 +198,8 @@ const newTaskName = ref("");
 const currentPage = ref(1);
 const totalPages = ref(1);
 
+const loginError = ref(false);
+
 const setCookie = (name, value, days = 1) => {
   const d = new Date();
   d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
@@ -220,7 +225,8 @@ const setPage = async (page) => {
 };
 
 const setModal = () => {
-  modal.value = !modal.value;
+	if(!loginError.value)
+		modal.value = !modal.value;
 };
 
 const toggleTask = async (index, doneValue) => {
@@ -271,7 +277,8 @@ const auth = async (email, password) => {
       method: "POST",
       body: { email, password },
     });
-
+		if(loginError.value)
+			loginError.value = false;
     console.log(response);
 
     modalEmail.value = "";
@@ -288,6 +295,7 @@ const auth = async (email, password) => {
     await getUser();
   } catch (error) {
     console.error(error);
+		loginError.value = true;
   }
 };
 
