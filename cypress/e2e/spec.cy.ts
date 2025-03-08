@@ -1,6 +1,6 @@
 describe('template spec', () => {
   beforeEach(() => {
-		cy.clearCookies();
+		cy.clearCookies(); 
     cy.visit('http://localhost:3000');
   });
 	it('authorization error with wrong information', () => {
