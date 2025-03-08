@@ -14,4 +14,4 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           build: npm run build
-          start: npx cypress run --record --key ${{ secrets.CYPRESS_KEY }}
+          start: npx cypress run --record --key 7aa5299c-ea9e-45fa-8fba-035d62e2b05c
