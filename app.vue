@@ -1,158 +1,92 @@
 <template>
-  <div class="flex justify-center">
-    <div class="p-5 m-5 bg-blue-50 rounded-lg w-150">
-      <div class="flex mb-5 justify-between">
+  <Panel class="m-5" style="--p-panel-content-padding: 0">
+    <template #header>
+      <div class="flex w-[100vw] justify-between items-center">
         <h2 class="text-3xl font-regular">1Tool todo list</h2>
-        <button
-          v-if="!user.name"
-					data-type="login"
-          v-on:click="setModal()"
-          class="bg-sky-300 text-white rounded cursor-pointer p-2"
-        >
-          Login
-        </button>
-        <div v-else class="flex items-center">
-          <span data-type="welcome-username" class="text-green-500 mr-4">Welcome {{ user.name }}!</span>
-          <button
+        <div class="flex justify-center items-center">
+          <Button
+            label="Login"
+            severity="primary"
+            v-if="showLoginButton"
+            data-type="login"
+            v-on:click="setModal()"
+            class="bg-sky-300 text-white rounded cursor-pointer p-2"
+          >
+          </Button>
+          <Tag data-type="welcome-username" v-if="user.name" icon="pi pi-check" severity="success"
+            >Welcome {{ user.name }}!</Tag
+          >
+          <Button
+            class="ml-4"
+            v-if="user.name"
+            label="Logout"
+            severity="danger"
             v-on:click="logout()"
-            class="bg-red-500 text-white rounded cursor-pointer p-2"
+            variant="outlined"
           >
-            Logout
-          </button>
+          </Button>
         </div>
       </div>
-
-      <div
-        v-if="modal"
-				data-type="modal"
-        class="relative z-10"
-        aria-labelledby="modal-title"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div
-          class="fixed inset-0 bg-gray-500/75 transition-opacity"
-          aria-hidden="true"
-        ></div>
-
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div
-            class="flex sm:min-h-full min-h-[70vh] items-end justify-center p-4 text-center sm:items-center sm:p-0"
-          >
-            <div
-              class="relative transform overflow-hidden rounded bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
-            >
-              <div class="flex justify-end w-full">
-                <button
-                  v-on:click="setModal()"
-                  type="button"
-                  class="bg-white cursor-pointer rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                >
-                  <svg
-                    class="h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div class="bg-white px-4 pb-4">
-                <div>
-                  <form class="flex flex-col" action="">
-                    <label class="flex flex-col mb-5" for="email">
-                      Email
-                      <input
-                        v-model="modalEmail"
-                        class="border-1 border-gray-300 h-7 rounded pl-2"
-                        type="email"
-                        name="email"
-                        id="email"
-                      />
-                    </label>
-                    <label class="flex flex-col mb-5" for="password">
-                      Password
-                      <input
-                        v-model="modalPassword"
-                        class="border-1 border-gray-300 h-7 rounded pl-2"
-                        type="password"
-                        name="password"
-                        id="password"
-                      />
-                    </label>
-                    <input
-                      v-on:click="auth(modalEmail, modalPassword)"
-                      class="bg-sky-300 text-white rounded cursor-pointer p-2"
-                      type="button"
-                      value="Login"
-                    />
-                  </form>
-									<span v-if="loginError" class="text-red-500" data-type="login-error">Login error</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr class="border-t border-gray-300 my-4" />
+    </template>
+    <hr class="border-t border-gray-300 my-4" />
+    <template #footer>
       <h3 class="text-lg mb-2">List of tasks</h3>
       <div v-if="user.name" class="mb-4">
         <label for="">
-          <input
+          <InputText
+						data-type="add-input-task"
+            class="w-50 h-8 text-lg"
             v-model="newTaskName"
-            class="bg-white rounded h-7 border-1 border-gray-300 pl-2"
+            v-tooltip.focus.top="'Type a new task'"
             type="text"
-            placeholder="Type a new task"
           />
-          <input
+
+          <Button
+						data-type="add-task"
             v-on:click="createTask(newTaskName)"
-            class="ml-2 bg-sky-300 text-white rounded cursor-pointer p-1"
+            class="ml-2"
+            size="small"
             type="button"
-            value="Add"
-          />
+            label="Add"
+          ></Button>
         </label>
       </div>
 
-      <ul v-if="tasks.length">
+      <ul v-if="tasks.length" class="space-y-2">
         <li v-for="(task, index) in tasks" :key="task.id">
-          <label v-if="!task.completed">
-            <input
+          <div v-if="!task.completed" class="flex items-center gap-1.5">
+						<Button data-type="task-edit" v-on:click="setEditTask(index)" class="mr-3 min-w-[30px]" icon="pi pi-pen-to-square" rounded variant="outlined" size="small"></Button>
+            <Checkbox
               v-on:click="toggleTask(index, 1)"
-              type="checkbox"
               v-model="task.completed"
-              class="w-4 h-4 rounded"
+              :inputId="`${task.id}`"
+              name="task"
+              :value="task.name"
+              binary
             />
-            {{ task.name }}
-          </label>
+            <label data-type="task-name" class="break-words" :for="`${task.id}`">{{ task.name }}</label>
+          </div>
         </li>
       </ul>
-      <p v-else-if="!user.name">Login first</p>
       <p v-else>No tasks</p>
-      <hr class="border-t border-gray-300 my-4" />
+      <hr class="border-t border-gray-200 my-4" />
       <h3 class="text-lg mb-2">Completed</h3>
-      <ul v-if="tasks.length">
+      <ul v-if="tasks.length" class="space-y-2">
         <li v-for="(task, index) in tasks" :key="task.id">
-          <label v-if="task.completed" class="line-through">
-            <input
+          <div v-if="task.completed" class="flex items-center gap-1.5">
+						<Button data-type="task-edit" v-on:click="setEditTask(index)" class="mr-3 min-w-[30px]" icon="pi pi-pen-to-square" rounded variant="outlined" size="small"></Button>
+            <Checkbox
               v-on:click="toggleTask(index, 0)"
-              type="checkbox"
               v-model="task.completed"
-              class="w-4 h-4 rounded"
+              :inputId="`${task.id}`"
+              name="task"
+              :value="task.name"
+              binary
             />
-            {{ task.name }}
-          </label>
+            <label data-type="task-name" class="break-words line-through" :for="`${task.id}`">{{ task.name }}</label>
+          </div>
         </li>
       </ul>
-      <p v-else-if="!user.name">Login first</p>
       <p v-else>No completed tasks</p>
       <ul
         v-if="totalPages > 1"
@@ -164,19 +98,99 @@
           v-on:click="setPage(page)"
           class="cursor-pointer"
         >
-          <span
-            v-if="page == currentPage"
-            class="bg-sky-300 p-2 rounded text-white"
-          >
+          <Button data-type="page-selected" v-if="page == currentPage" variant="outlined" size="small">
             {{ page }}
-          </span>
-          <span v-else class="p-2">
+          </Button>
+          <Button data-type="page" v-else variant="text" size="small">
             {{ page }}
-          </span>
+          </Button>
         </li>
       </ul>
-    </div>
-  </div>
+
+      <Dialog
+        data-type="modal"
+        v-model:visible="modal"
+        modal
+        header="Login"
+        :style="{ width: '25rem' }"
+      >
+        <span class="text-surface-500 dark:text-surface-400 block mb-8"
+          >Login to your 1Tool account to fetch tasks</span
+        >
+        <div class="flex items-center gap-4 mb-8">
+          <label for="email" class="font-semibold w-24">Email</label>
+          <InputText
+            v-model="modalEmail"
+            id="email"
+            class="flex-auto"
+            autocomplete="off"
+						data-type="email"
+          />
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+          <label for="password" class="font-semibold w-24">Password</label>
+          <Password
+            v-model="modalPassword"
+            :feedback="false"
+            id="password"
+            class="flex-auto flex-col"
+            autocomplete="off"
+						data-type="password"
+          />
+        </div>
+        <div class="flex justify-end gap-2">
+          <Button
+						data-type="login-button"
+            type="button"
+            label="Login"
+            @click="auth(modalEmail, modalPassword)"
+          ></Button>
+        </div>
+        <span v-if="loginError" class="text-red-500" data-type="login-error"
+          >Login error</span
+        >
+      </Dialog>
+
+      <Dialog
+        data-type="modal-edit"
+        v-model:visible="modalEdit"
+        modal
+        header="Edit task"
+        :style="{ width: '25rem' }"
+      >
+        <span class="text-surface-500 dark:text-surface-400 block mb-8"
+          >{{ tasks[editTaskIndex].name }}</span
+        >
+        <div class="flex items-center gap-4 mb-8">
+          <label for="editTask" class="font-semibold w-24">New name</label>
+          <InputText
+						data-type="edit-task-input"
+            v-model="editTaskInput"
+            id="editTask"
+            class="flex-auto"
+            autocomplete="off"
+          />
+        </div>
+        
+        <div class="flex justify-end gap-2">
+					<Button
+						data-type="edit-task-remove"
+						severity="danger"
+						type="button"
+						label="Remove task"
+						@click="removeTask()"
+					></Button>
+          <Button
+						data-type="edit-task-rename"
+            type="button"
+            label="Save task"
+            @click="renameTask(editTaskInput)"
+          ></Button>
+        </div>
+        
+      </Dialog>
+    </template>
+  </Panel>
 </template>
 
 <script setup>
@@ -200,6 +214,13 @@ const totalPages = ref(1);
 
 const loginError = ref(false);
 
+const showLoginButton = ref(false);
+
+const editTaskInput = ref("");
+const modalEdit = ref(false);
+let editTaskIndex = -1;
+
+
 const setCookie = (name, value, days = 1) => {
   const d = new Date();
   d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
@@ -218,6 +239,48 @@ const getCookie = (name) => {
   return "";
 };
 
+const clearModalEdit = () => {
+	modalEdit.value = false;
+	editTaskInput.value = "";
+	editTaskIndex = -1;
+}
+
+const setEditTask = (index) => {
+	editTaskIndex = index;
+	modalEdit.value = true;
+}
+
+const removeTask = async () => {
+	try {
+		const task = tasks.value[editTaskIndex];
+    const taskToExport = JSON.parse(JSON.stringify(task));
+    delete taskToExport.completed;
+
+    const response = await $fetch(
+      `https://my.1tool.com/suite/api/tasks/${task.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + apiToken.value,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskToExport),
+      }
+    );
+		clearModalEdit();
+		await fetchTasks();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const renameTask = async (name) => {
+	const task = tasks.value[editTaskIndex];
+	task.name = name;
+	clearModalEdit();
+	await updateTask(task);
+}
+
 const setPage = async (page) => {
   currentPage.value = page;
   tasks.value = [];
@@ -225,8 +288,7 @@ const setPage = async (page) => {
 };
 
 const setModal = () => {
-	if(!loginError.value)
-		modal.value = !modal.value;
+  modal.value = !modal.value;
 };
 
 const toggleTask = async (index, doneValue) => {
@@ -248,6 +310,11 @@ const logout = () => {
   tasks.value = [];
   currentPage.value = 1;
   totalPages.value = 1;
+  showLoginButton.value = true;
+	if(newTaskName.value !== "")
+		newTaskName.value = "";
+	if(modalEdit.value)
+		clearModalEdit();
 };
 
 const updateTask = async (task) => {
@@ -277,14 +344,11 @@ const auth = async (email, password) => {
       method: "POST",
       body: { email, password },
     });
-		if(loginError.value)
-			loginError.value = false;
+    if (loginError.value) loginError.value = false;
     console.log(response);
 
     modalEmail.value = "";
     modalPassword.value = "";
-
-    setModal();
 
     setCookie("api_token", response.api_token);
     setCookie("api_id", response.id);
@@ -292,10 +356,12 @@ const auth = async (email, password) => {
     apiToken.value = response.api_token;
     apiId.value = response.id;
 
+    setModal();
+
     await getUser();
   } catch (error) {
     console.error(error);
-		loginError.value = true;
+    loginError.value = true;
   }
 };
 
@@ -310,6 +376,7 @@ const getUser = async () => {
       }
     );
     user.value = response.data;
+    showLoginButton.value = false;
     await fetchTasks();
   } catch (error) {
     console.error(error);
@@ -340,6 +407,7 @@ const fetchTasks = async () => {
 };
 
 const createTask = async (name) => {
+  if (name === "") return;
   try {
     const response = await $fetch(`https://my.1tool.com/suite/api/tasks`, {
       method: "POST",
@@ -361,5 +429,6 @@ onMounted(async () => {
   apiId.value = getCookie("api_id");
   if (apiToken.value !== "" && apiId.value !== -1)
     await getUser(apiId.value, apiToken.value);
+  else showLoginButton.value = true;
 });
 </script>

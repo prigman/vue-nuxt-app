@@ -8,15 +8,21 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-		"cy:open": "cypress open"
+    "cy:open": "cypress open"
   },
   "dependencies": {
+    "@primeuix/themes": "^1.0.0",
     "@tailwindcss/vite": "^4.0.9",
     "nuxt": "^3.15.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.1",
+    "tailwindcss-primeui": "^0.5.1",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
-    "cypress": "^14.1.0"
+    "@primevue/nuxt-module": "^4.3.1",
+    "cypress": "^14.1.0",
+    "postcss-import": "^16.1.0"
   }
 }
